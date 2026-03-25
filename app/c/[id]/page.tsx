@@ -1,34 +1,47 @@
+import { supabase } from "../../../lib/supabase";
+import Navbar from "../../../components/Navbar";
+import ReactionBar from "../../../components/ReactionBar";
+import CommentBox from "../../../components/CommentBox";
+import CommentList from "../../../components/CommentList";
 
-import { supabase } from "@/lib/supabase";
-import Navbar from "@/components/Navbar";
-import ReactionBar from "@/components/ReactionBar";
-import CommentBox from "@/components/CommentBox";
-import CommentList from "@/components/CommentList";
+export default async function Page({ params }) {
+  const { data } = await supabase
+    .from("confessions")
+    .select("*")
+    .eq("id", params.id)
+    .single();
 
-export default async function Page({params}){
-  const {data}=await supabase.from("confessions").select("*").eq("id",params.id).single();
-  const {data:rx}=await supabase.from("reactions").select("*").eq("confession_id",params.id);
-  const {data:comments}=await supabase.from("comments").select("*").eq("confession_id",params.id);
+  const { data: reactions } = await supabase
+    .from("reactions")
+    .select("*")
+    .eq("confession_id", params.id);
 
-  const help=rx?.filter(r=>r.type==="help").length||0;
-  const hum=rx?.filter(r=>r.type==="humiliate").length||0;
+  const { data: comments } = await supabase
+    .from("comments")
+    .select("*")
+    .eq("confession_id", params.id);
+
+  const help = reactions?.filter(r => r.type === "help").length || 0;
+  const humiliate = reactions?.filter(r => r.type === "humiliate").length || 0;
 
   return (
     <>
-      <Navbar/>
+      <Navbar />
+
       <div className="card">
         <p>{data?.content}</p>
-        <ReactionBar help={help} humiliate={hum}/>
+
+        <ReactionBar help={help} humiliate={humiliate} />
+
+        <button className="btn btn-green">Help</button>
+        <button className="btn btn-red">Humiliate</button>
       </div>
 
-      <button className="btn btn-green">Help</button>
-      <button className="btn btn-red">Humiliate</button>
+      <CommentBox id={params.id} type="help" />
+      <CommentBox id={params.id} type="humiliate" />
 
-      <CommentBox id={params.id} type="help"/>
-      <CommentBox id={params.id} type="humiliate"/>
-
-      <CommentList comments={comments||[]} type="help"/>
-      <CommentList comments={comments||[]} type="humiliate"/>
+      <CommentList comments={comments || []} type="help" />
+      <CommentList comments={comments || []} type="humiliate" />
     </>
-  )
+  );
 }
