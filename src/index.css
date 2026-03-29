@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+@theme {
+  --dark-mode: selector;
+}
+
+@layer base {
+  html, body {
+    @apply overflow-x-hidden w-full;
+  }
+}
